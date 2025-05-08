@@ -6,3 +6,4 @@ rouge-score
 numpy
 duckduckgo-search
 PyPDF2
+scipy
