@@ -11,6 +11,7 @@ import wikipedia
 from urllib.parse import quote
 import json
 from datetime import datetime, timedelta
+import os # Added import
 
 app = Flask(__name__)
 
@@ -31,7 +32,7 @@ ner_pipeline = pipeline("ner", model="dbmdz/bert-large-cased-finetuned-conll03-e
 category_pipeline = pipeline("text-classification", model="facebook/bart-large-mnli")
 
 # NewsAPI configuration
-NEWSAPI_KEY = "042b9592ace5447f820c426c89112cca"  # You'll need to replace this with your actual API key
+NEWSAPI_KEY = os.environ.get("NEWSAPI_KEY")  # Replaced hardcoded key
 NEWSAPI_URL = "https://newsapi.org/v2/everything"
 
 def detect_category(text):
@@ -332,6 +333,3 @@ def home():
                            error_message=error_message,
                            categories=categories,
                            related_topics=related_topics)
-
-if __name__ == "__main__":
-    app.run(debug=True)
