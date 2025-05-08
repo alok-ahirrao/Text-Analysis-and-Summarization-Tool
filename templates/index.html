@@ -1,0 +1,1154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Text Analyzer</title>
+    <style>
+        .dark-mode {
+            --bg-color: #1a1a1a;
+            --text-color: #ffffff;
+            --card-bg: #2d2d2d;
+            --border-color: #404040;
+            --highlight-color: #3498db;
+            --secondary-bg: #333333;
+            --hover-bg: #404040;
+        }
+
+        .light-mode {
+            --bg-color: #f8f9fa;
+            --text-color: #333333;
+            --card-bg: #ffffff;
+            --border-color: #dee2e6;
+            --highlight-color: #007bff;
+            --secondary-bg: #e9ecef;
+            --hover-bg: #f8f9fa;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            line-height: 1.6;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+            box-sizing: border-box;
+            transition: all 0.3s ease;
+        }
+        .container {
+            background-color: var(--card-bg);
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 1400px;
+            box-sizing: border-box;
+        }
+        .input-section {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 40px;
+            align-items: stretch;
+        }
+        .input-box {
+            flex: 1;
+            background: var(--secondary-bg);
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+        }
+        .input-box:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+        }
+        .upload-section {
+            text-align: center;
+        }
+        .upload-button {
+            background: var(--highlight-color);
+            color: white;
+            padding: 15px 30px;
+            border-radius: 12px;
+            border: none;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            margin-top: 15px;
+        }
+        .upload-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0, 123, 255, 0.3);
+        }
+        .or-divider {
+            display: flex;
+            align-items: center;
+            color: var(--text-color);
+            font-weight: 500;
+            margin: 0 20px;
+        }
+        .or-divider::before,
+        .or-divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: var(--border-color);
+            margin: 0 15px;
+        }
+        textarea {
+            width: 100%;
+            min-height: 150px;
+            padding: 15px;
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            font-size: 1rem;
+            background: var(--card-bg);
+            color: var(--text-color);
+            transition: all 0.3s ease;
+            resize: vertical;
+        }
+        textarea:focus {
+            border-color: var(--highlight-color);
+            box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+            outline: none;
+        }
+        .analyze-button {
+            background: linear-gradient(45deg, #007bff, #00bcd4);
+            color: white;
+            padding: 15px 40px;
+            border-radius: 12px;
+            border: none;
+            font-size: 1.1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 30px auto;
+            display: block;
+        }
+        .analyze-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 123, 255, 0.4);
+        }
+        .tabs {
+            display: flex;
+            gap: 10px;
+            border-bottom: 2px solid var(--border-color);
+            margin-bottom: 30px;
+            padding: 0 10px;
+            flex-wrap: wrap;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        .tab {
+            padding: 12px 25px;
+            cursor: pointer;
+            border: none;
+            border-radius: 12px 12px 0 0;
+            background-color: var(--secondary-bg);
+            color: var(--text-color);
+            font-weight: 500;
+            transition: all 0.3s ease;
+            position: relative;
+            white-space: nowrap;
+            min-width: fit-content;
+        }
+        .tab:hover {
+            background-color: var(--hover-bg);
+            transform: translateY(-3px);
+        }
+        .tab.active {
+            background: linear-gradient(45deg, #007bff, #00bcd4);
+            color: white;
+        }
+        .tab-content {
+            display: none;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .tab-content.active {
+            display: block;
+            opacity: 1;
+        }
+        .result-section {
+            background-color: var(--card-bg);
+            border-radius: 15px;
+            border: 1px solid var(--border-color);
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+        }
+        .result-section:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+        }
+        .result-section h2 {
+            color: var(--highlight-color);
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--border-color);
+        }
+        .progress {
+            background-color: var(--secondary-bg);
+            border-radius: 10px;
+            height: 20px;
+            margin: 10px 0;
+            overflow: hidden;
+        }
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(45deg, #007bff, #00bcd4);
+            border-radius: 10px;
+            transition: width 1s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 0.8rem;
+            text-align: right;
+            padding-right: 8px;
+        }
+        .progress-label {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: white;
+            font-size: 0.8rem;
+            font-weight: 500;
+            text-shadow: 0 0 3px rgba(0, 0, 0, 0.3);
+        }
+        .entity-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        .entity-item {
+            background: var(--secondary-bg);
+            padding: 12px;
+            border-radius: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .entity-score {
+            display: inline-block;
+            background-color: var(--highlight-color);
+            color: white;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.75em;
+            margin-left: 8px;
+            font-weight: normal;
+        }
+        .result-section .content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 5px;
+        }
+        .summary .content {
+            max-height: 300px;
+        }
+        .sentiment .content {
+            max-height: 200px;
+        }
+        .entities .content {
+            max-height: 300px;
+        }
+        .related-news .content {
+            max-height: 300px;
+        }
+        .extracted-text-panel {
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            border-left: 5px solid #6c757d;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .analysis-results-panel {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            flex: 1;
+            overflow-y: auto;
+            margin-top: 20px;
+            padding-right: 10px;
+        }
+        .result-section h2 {
+            color: #17a2b8;
+            border-bottom: 2px solid #e9ecef;
+            padding-bottom: 10px;
+            margin-top: 0;
+            margin-bottom: 15px;
+        }
+        .result-section .content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 5px;
+        }
+        .summary .content {
+            max-height: 300px;
+        }
+        .sentiment .content {
+            max-height: 200px;
+        }
+        .entities .content {
+            max-height: 300px;
+        }
+        .related-news .content {
+            max-height: 300px;
+        }
+        textarea {
+            width: 100%;
+            min-height: 150px;
+            margin-bottom: 10px;
+            padding: 10px;
+            border: 1px solid #ced4da;
+            border-radius: 5px;
+            font-size: 0.95rem;
+            box-sizing: border-box;
+            resize: vertical;
+        }
+        .upload-button-styled {
+            padding: 6px 12px;
+            font-size: 0.9rem;
+        }
+        .analysis-column {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            min-height: 0; /* Important for proper flex child behavior */
+        }
+        h1 {
+            color: #0056b3; /* Darker blue */
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        h2 {
+            color: #17a2b8;
+            border-bottom: 2px solid #e9ecef;
+            padding-bottom: 5px;
+            margin-top: 0;
+            margin-bottom: 15px;
+            position: sticky;
+            top: 0;
+            background-color: #f8f9fa;
+            z-index: 1;
+        }
+        h3 {
+             color: #6c757d; /* Gray */
+             margin-top: 15px;
+             margin-bottom: 5px;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            padding: 12px 25px; /* Slightly larger padding */
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background-color 0.2s ease, box-shadow 0.2s ease;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        button:hover {
+            background-color: #0056b3;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+        button:disabled,
+        .upload-button-styled.disabled { /* Style disabled upload button */
+           background-color: #adb5bd;
+           cursor: not-allowed;
+           box-shadow: none;
+           color: #e9ecef;
+        }
+        /* Style for the custom PDF upload button */
+        .upload-button-styled {
+            display: inline-block; /* Allow width/padding */
+            background-color: #17a2b8; /* Teal color */
+            color: white;
+            padding: 8px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9rem; /* Slightly smaller font */
+            transition: background-color 0.2s ease, box-shadow 0.2s ease;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            width: calc(100% - 30px); /* Match padding */
+        }
+        .upload-button-styled:hover {
+            background-color: #138496; /* Darker teal */
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+        /* Hide the actual file input */
+        input[type="file"].hidden-input {
+            width: 0.1px;
+            height: 0.1px;
+            opacity: 0;
+            overflow: hidden;
+            position: absolute;
+            z-index: -1;
+        }
+        .loader {
+           display: none; /* Hidden by default */
+           margin-left: 15px;
+           font-style: italic;
+           color: #6c757d;
+           vertical-align: middle; /* Align with button text */
+        }
+        .summary {
+            border-left-color: #007bff; /* Blue */
+        }
+        .sentiment {
+           border-left-color: #ffc107; /* Yellow */
+           background-color: #fff9e6; /* Lighter yellow background */
+        }
+        .entities {
+           border-left-color: #28a745; /* Green */
+           background-color: #eaf6ec; /* Lighter green background */
+        }
+        .entities ul {
+           list-style-type: none;
+           padding-left: 0;
+           margin: 10px 0;
+        }
+        .entities li {
+           background-color: #ffffff;
+           margin-bottom: 8px;
+           padding: 8px 12px;
+           border-radius: 4px;
+           border: 1px solid #e9ecef;
+        }
+        .entity-score {
+            color: #6c757d;
+            font-size: 0.85em;
+            margin-left: 8px;
+        }
+        .related-news {
+           border-left-color: #fd7e14; /* Orange */
+           background-color: #fff3e0; /* Lighter orange background */
+        }
+        .related-news ul {
+           list-style-type: none;
+           padding-left: 0;
+           margin: 10px 0;
+        }
+        .related-news li {
+           background-color: #ffffff;
+           margin-bottom: 8px;
+           padding: 8px 12px;
+           border-radius: 4px;
+           border: 1px solid #e9ecef;
+        }
+        .related-news a {
+            text-decoration: none;
+            color: #0056b3;
+            font-weight: bold;
+        }
+        .related-news a:hover {
+            text-decoration: underline;
+        }
+        .news-source {
+            display: block;
+            font-size: 0.85em;
+            color: #6c757d;
+            margin-top: 3px;
+        }
+        pre {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            font-family: inherit;
+            font-size: 0.95em;
+            margin: 0;
+            padding: 10px;
+            background-color: #fff;
+            border-radius: 4px;
+        }
+        .loader-container {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--bg-color);
+            opacity: 0.95;
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+        .loader-content {
+            text-align: center;
+            animation: fadeInUp 0.5s ease;
+            background: var(--card-bg);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            max-width: 500px;
+            width: 90%;
+        }
+        .loader-spinner {
+            width: 60px;
+            height: 60px;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #007bff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+            box-shadow: 0 0 15px rgba(0,123,255,0.2);
+        }
+        .loader-text {
+            color: var(--highlight-color);
+            font-size: 1.4rem;
+            font-weight: 500;
+            margin-bottom: 20px;
+            text-shadow: 0 0 10px rgba(0,123,255,0.2);
+        }
+        .loader-progress {
+            width: 100%;
+            height: 4px;
+            background-color: var(--secondary-bg);
+            border-radius: 2px;
+            overflow: hidden;
+            margin: 20px 0;
+        }
+        .loader-progress-bar {
+            height: 100%;
+            width: 0;
+            background-color: var(--highlight-color);
+            animation: progress 2s ease infinite;
+        }
+        @keyframes progress {
+            0% { width: 0; }
+            50% { width: 70%; }
+            100% { width: 100%; }
+        }
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .loader-steps {
+            margin-top: 20px;
+            font-size: 0.9rem;
+            color: var(--text-color);
+        }
+        .loader-step {
+            opacity: 0;
+            animation: fadeIn 0.3s ease forwards;
+            padding: 8px;
+            margin: 5px 0;
+            border-radius: 4px;
+            background: var(--secondary-bg);
+            transition: all 0.3s ease;
+        }
+        .loader-step.active {
+            color: var(--highlight-color);
+            font-weight: 500;
+            background: var(--card-bg);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .theme-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            padding: 10px;
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+        .theme-toggle:hover {
+            transform: scale(1.1);
+        }
+        .progress {
+            background-color: var(--secondary-bg);
+            border-radius: 10px;
+            height: 20px;
+            margin: 10px 0;
+            overflow: hidden;
+        }
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(45deg, #007bff, #00bcd4);
+            border-radius: 10px;
+            transition: width 1s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 0.8rem;
+            text-align: right;
+            padding-right: 8px;
+        }
+        .categories ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .categories li {
+            margin-bottom: 15px;
+            background: var(--secondary-bg);
+            padding: 15px;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+        }
+        .categories li:hover {
+            transform: translateX(5px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+        .categories strong {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--highlight-color);
+        }
+        /* Entity styles */
+        .entities .entity-group {
+            margin-bottom: 25px;
+            background: var(--card-bg);
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        .entities h3 {
+            color: var(--highlight-color);
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 8px;
+        }
+        .entities ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 10px;
+        }
+        .entities li {
+            background: var(--secondary-bg);
+            padding: 10px 15px;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: transform 0.2s ease;
+        }
+        .entities li:hover {
+            transform: translateX(5px);
+        }
+        .entity-name {
+            font-weight: 500;
+        }
+        .entity-score {
+            background: var(--highlight-color);
+            color: white;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+        }
+
+        /* Topics styles */
+        .topics .topic-section {
+            margin-bottom: 25px;
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        .topics h3 {
+            color: var(--highlight-color);
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+        }
+        .topics ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .topics li {
+            margin-bottom: 12px;
+            padding: 12px;
+            background: var(--secondary-bg);
+            border-radius: 8px;
+            transition: transform 0.2s ease;
+        }
+        .topics li:hover {
+            transform: translateX(5px);
+        }
+        .topics a {
+            color: var(--text-color);
+            text-decoration: none;
+            display: block;
+            font-weight: 500;
+        }
+        .topics a:hover {
+            color: var(--highlight-color);
+        }
+
+        /* News styles */
+        .related-news ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .related-news li {
+            margin-bottom: 15px;
+            padding: 15px;
+            background: var(--secondary-bg);
+            border-radius: 10px;
+            transition: all 0.3s ease;
+        }
+        .related-news li:hover {
+            transform: translateX(5px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .related-news a {
+            color: var(--text-color);
+            text-decoration: none;
+            font-weight: 500;
+            display: block;
+            margin-bottom: 5px;
+        }
+        .related-news a:hover {
+            color: var(--highlight-color);
+        }
+        .news-source {
+            display: block;
+            color: var(--highlight-color);
+            font-size: 0.85rem;
+            margin-top: 5px;
+        }
+        .news-date {
+            color: var(--text-color);
+            opacity: 0.7;
+            font-size: 0.85rem;
+        }
+        .no-results {
+            color: var(--text-color);
+            background: var(--secondary-bg);
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            margin: 20px 0;
+            font-style: italic;
+        }
+        .retry-button {
+            background: var(--highlight-color);
+            color: white;
+            padding: 8px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            margin-top: 10px;
+            transition: all 0.3s ease;
+        }
+        .retry-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+        .error-message {
+            color: #dc3545;
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 style="text-align: center; color: var(--highlight-color); margin-bottom: 40px; font-size: 2.5rem;">AI PDF Analyzer</h1>
+        
+        <form method="POST" id="analysis-form" enctype="multipart/form-data">
+            <div class="input-section">
+                <div class="input-box upload-section">
+                    <label for="pdf_file_label" style="display: block; margin-bottom: 15px; font-weight: 500;">Upload PDF</label>
+                    <input type="file" id="pdf_file" name="pdf_file" accept=".pdf" class="hidden-input">
+                    <label for="pdf_file" class="upload-button" id="pdf_file_label">Choose PDF File</label>
+                    <span id="pdf-file-name" style="display: block; margin-top: 10px; font-size: 0.9em; color: var(--text-color);">No file chosen</span>
+                </div>
+
+                <div class="or-divider">OR</div>
+
+                <div class="input-box">
+                    <label for="text_input" style="display: block; margin-bottom: 15px; font-weight: 500;">Paste Text</label>
+                    <textarea id="text_input" name="text_input" placeholder="Paste your text here...">{{ original_text if original_text }}</textarea>
+                </div>
+            </div>
+            
+            <button type="submit" id="submit-button" class="analyze-button">Analyze Content</button>
+            <button class="theme-toggle" onclick="toggleTheme()">
+                <i class="fas fa-moon"></i>
+            </button>
+            <div class="loader-container" id="loader-container">
+                <div class="loader-content">
+                    <div class="loader-text">Analyzing your text...</div>
+                    <div class="loader-progress">
+                        <div class="loader-progress-bar"></div>
+                    </div>
+                    <div class="loader-steps">
+                        <div class="loader-step" id="step1">Extracting content...</div>
+                        <div class="loader-step" id="step2">Generating summary...</div>
+                        <div class="loader-step" id="step3">Analyzing sentiment...</div>
+                        <div class="loader-step" id="step4">Detecting categories...</div>
+                        <div class="loader-step" id="step5">Finding related topics...</div>
+                    </div>
+                </div>
+            </div>
+        </form>
+
+        {% if error_message %}
+        <div class="error-message" style="color: red; background-color: #ffebee; border: 1px solid #e57373; padding: 10px; margin-top: 15px; border-radius: 5px;">
+            <strong>Error:</strong> {{ error_message }}
+        </div>
+        {% endif %}
+
+        <div class="results-container">
+            {% if summary or sentiment or categories or entities or related_topics or related_news %}
+            <div class="tab-container">
+                <div class="tabs">
+                    <button class="tab active" onclick="openTab(event, 'summary-tab')">Summary</button>
+                    <button class="tab" onclick="openTab(event, 'sentiment-tab')">Sentiment</button>
+                    <button class="tab" onclick="openTab(event, 'category-tab')">Categories</button>
+                    <button class="tab" onclick="openTab(event, 'entities-tab')">Named Entities</button>
+                    <button class="tab" onclick="openTab(event, 'topics-tab')">Related Topics</button>
+                    <button class="tab" onclick="openTab(event, 'news-tab')">Related News</button>
+                </div>
+
+                <div class="tab-contents">
+                    <div id="summary-tab" class="tab-content active">
+                        {% if summary %}
+                        <div class="result-section summary">
+                            <h2>Summary</h2>
+                            <p>{{ summary }}</p>
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <div id="sentiment-tab" class="tab-content">
+                        {% if sentiment %}
+                        <div class="result-section sentiment">
+                            <h2>Sentiment Analysis</h2>
+                            <p><strong>Overall Sentiment:</strong> {{ sentiment }}</p>
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <div id="category-tab" class="tab-content">
+                        {% if categories %}
+                        <div class="result-section categories">
+                            <h2>Content Categories</h2>
+                            <ul>
+                                {% for category, score in categories %}
+                                <li>
+                                    <strong>{{ category }}</strong>
+                                    <div class="progress">
+                                        <div class="progress-bar">
+                                            {{ '%.1f'|format(score * 100) }}%
+                                        </div>
+                                    </div>
+                                </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <div id="entities-tab" class="tab-content">
+                        <div class="result-section entities">
+                            <h2>Named Entities Found</h2>
+                            {% if entities %}
+                                {% if entities.items()|length > 0 %}
+                                    {% for entity_type, entity_list in entities.items() %}
+                                        {% if entity_list %}
+                                        <div class="entity-group">
+                                            <h3>{{ entity_type }}</h3>
+                                            <ul>
+                                                {% for entity in entity_list %}
+                                                <li>
+                                                    <span class="entity-name">{{ entity.word }}</span>
+                                                    <span class="entity-score">{{ '%.2f'|format(entity.score) }}</span>
+                                                </li>
+                                                {% endfor %}
+                                            </ul>
+                                        </div>
+                                        {% endif %}
+                                    {% endfor %}
+                                {% else %}
+                                    <p class="no-results">No named entities were found. Try adding more specific names, places, or organizations to your text.</p>
+                                {% endif %}
+                            {% else %}
+                                <p class="no-results">Enter text containing names, organizations, locations, or other entities to analyze.</p>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div id="topics-tab" class="tab-content">
+                        <div class="result-section topics">
+                            <h2>Related Topics</h2>
+                            {% if related_topics %}
+                                {% if related_topics|length > 0 %}
+                                    {% for topic in related_topics %}
+                                    <div class="topic-section">
+                                        <h3>{{ topic.topic }}</h3>
+                                        {% if topic.details|length > 0 %}
+                                        <ul>
+                                            {% for detail in topic.details %}
+                                            <li>
+                                                <a href="{{ detail.link }}" target="_blank" rel="noopener noreferrer">
+                                                    {{ detail.title }}
+                                                </a>
+                                            </li>
+                                            {% endfor %}
+                                        </ul>
+                                        {% else %}
+                                        <p class="no-results">Searching for related information...</p>
+                                        {% endif %}
+                                    </div>
+                                    {% endfor %}
+                                {% else %}
+                                    <p class="no-results">
+                                        No related topics found. This might be due to rate limiting.
+                                        <button onclick="retryAnalysis()" class="retry-button">Try Again</button>
+                                    </p>
+                                {% endif %}
+                            {% else %}
+                                <p class="no-results">Enter text to discover related topics and information.</p>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div id="news-tab" class="tab-content">
+                        <div class="result-section related-news">
+                            <h2>Related News</h2>
+                            {% if related_news %}
+                                {% if related_news|length > 0 %}
+                                <ul>
+                                    {% for news_item in related_news %}
+                                    <li>
+                                        <a href="{{ news_item.url }}" target="_blank" rel="noopener noreferrer">
+                                            {{ news_item.title }}
+                                        </a>
+                                        <div class="news-meta">
+                                            <span class="news-source">{{ news_item.source }}</span>
+                                            {% if news_item.date %}
+                                            <span class="news-date">{{ news_item.date }}</span>
+                                            {% endif %}
+                                        </div>
+                                    </li>
+                                    {% endfor %}
+                                </ul>
+                                {% else %}
+                                    <p class="no-results">
+                                        No related news found. This might be due to rate limiting.
+                                        <button onclick="retryAnalysis()" class="retry-button">Try Again</button>
+                                    </p>
+                                {% endif %}
+                            {% else %}
+                                <p class="no-results">Enter text to find related news articles.</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <script>
+        function openTab(evt, tabName) {
+            const tabContents = document.getElementsByClassName("tab-content");
+            const tabs = document.getElementsByClassName("tab");
+
+            // Hide all tab contents
+            Array.from(tabContents).forEach(content => {
+                content.style.display = 'none';
+                content.classList.remove("active");
+            });
+
+            // Remove active class from all tabs
+            Array.from(tabs).forEach(tab => {
+                tab.classList.remove("active");
+            });
+
+            // Show the selected tab content
+            const selectedContent = document.getElementById(tabName);
+            if (selectedContent) {
+                selectedContent.style.display = 'block';
+                setTimeout(() => {
+                    selectedContent.classList.add("active");
+                }, 50);
+            }
+
+            // Add active class to the clicked tab
+            evt.currentTarget.classList.add("active");
+        }
+
+        // Initialize tabs and progress bars when the page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set initial theme
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            document.body.classList.add(savedTheme + '-mode');
+
+            // Initialize progress bars
+            const progressBars = document.querySelectorAll('.progress-bar');
+            progressBars.forEach(bar => {
+                const text = bar.textContent.trim();
+                const value = parseFloat(text);
+                if (!isNaN(value)) {
+                    bar.style.width = value + '%';
+                }
+            });
+
+            // Show first available tab
+            const firstTab = document.querySelector('.tab');
+            if (firstTab) {
+                firstTab.click();
+            }
+        });
+
+        const form = document.getElementById('analysis-form');
+        const submitButton = document.getElementById('submit-button');
+        const loaderContainer = document.getElementById('loader-container');
+        const pdfInput = document.getElementById('pdf_file');
+        const textInput = document.getElementById('text_input');
+
+        let currentStep = 1;
+        const totalSteps = 5;
+        const stepDelay = 500;
+
+        function showAnalysisProgress() {
+            const loaderContainer = document.getElementById('loader-container');
+            loaderContainer.style.display = 'flex';
+
+            function activateStep(stepNum) {
+                const step = document.getElementById('step' + stepNum);
+                step.style.animation = 'fadeIn 0.3s ease forwards';
+                step.classList.add('active');
+                
+                if (stepNum < totalSteps) {
+                    setTimeout(() => activateStep(stepNum + 1), stepDelay);
+                }
+            }
+
+            // Start the step animation sequence
+            activateStep(1);
+        }
+
+        form.addEventListener('submit', function(event) {
+            if (!pdfInput.files.length && textInput.value.trim() === '') {
+                alert('Please either upload a PDF or paste text to analyze.');
+                event.preventDefault();
+                return;
+            }
+
+            showAnalysisProgress();
+            submitButton.disabled = true;
+        });
+
+        pdfInput.addEventListener('change', function() {
+            if (pdfInput.files.length > 0) {
+                textInput.value = '';
+            }
+        });
+
+        textInput.addEventListener('input', function() {
+            if (textInput.value.trim() !== '') {
+                pdfInput.value = '';
+                document.getElementById('pdf-file-name').textContent = 'No file chosen';
+                document.getElementById('pdf_file_label').classList.remove('disabled');
+            }
+        });
+
+        pdfInput.addEventListener('change', function() {
+            const fileNameDisplay = document.getElementById('pdf-file-name');
+            if (pdfInput.files.length > 0) {
+                fileNameDisplay.textContent = pdfInput.files[0].name;
+                document.getElementById('pdf_file_label').classList.add('disabled');
+            } else {
+                fileNameDisplay.textContent = 'No file chosen';
+                document.getElementById('pdf_file_label').classList.remove('disabled');
+            }
+        });
+
+        function toggleTheme() {
+            const body = document.body;
+            if (body.classList.contains('light-mode')) {
+                body.classList.remove('light-mode');
+                body.classList.add('dark-mode');
+                localStorage.setItem('theme', 'dark');
+            } else {
+                body.classList.remove('dark-mode');
+                body.classList.add('light-mode');
+                localStorage.setItem('theme', 'light');
+            }
+        }
+
+        function retryAnalysis() {
+            // Get the current text
+            const textInput = document.getElementById('text_input');
+            if (textInput.value.trim()) {
+                // Show loader
+                document.getElementById('loader-container').style.display = 'flex';
+                // Submit the form
+                document.getElementById('analysis-form').submit();
+            }
+        }
+
+        // Add loading state handling
+        document.getElementById('analysis-form').addEventListener('submit', function(e) {
+            const textInput = document.getElementById('text_input');
+            const pdfInput = document.getElementById('pdf_file');
+            
+            if (!textInput.value.trim() && (!pdfInput.files || !pdfInput.files.length)) {
+                e.preventDefault();
+                alert('Please enter text or upload a PDF file to analyze.');
+                return;
+            }
+            
+            // Show loading state
+            document.getElementById('loader-container').style.display = 'flex';
+            
+            // Start the step animation
+            let currentStep = 1;
+            const totalSteps = 5;
+            const stepInterval = setInterval(() => {
+                if (currentStep <= totalSteps) {
+                    const step = document.getElementById('step' + currentStep);
+                    if (step) {
+                        step.classList.add('active');
+                    }
+                    currentStep++;
+                } else {
+                    clearInterval(stepInterval);
+                }
+            }, 1000);
+        });
+    </script>
+</body>
+</html>

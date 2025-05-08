@@ -1,0 +1,8 @@
+torch
+transformers
+datasets
+flask
+rouge-score
+numpy
+duckduckgo-search
+PyPDF2
